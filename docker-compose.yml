@@ -1,0 +1,103 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  database:
+    image: postgres:15-alpine
+    container_name: stock_management_db
+    environment:
+      POSTGRES_DB: stock_management
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./stock-management-backend/database_init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - stock_management_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d stock_management"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # Backend API
+  backend:
+    build:
+      context: ./stock-management-backend
+      dockerfile: Dockerfile
+    container_name: stock_management_backend
+    environment:
+      - FLASK_ENV=production
+      - DATABASE_URL=postgresql://postgres:postgres123@database:5432/stock_management
+      - JWT_SECRET_KEY=your-super-secret-jwt-key-change-in-production
+      - CORS_ORIGINS=http://localhost:3000,http://localhost:80
+    ports:
+      - "5000:5000"
+    depends_on:
+      database:
+        condition: service_healthy
+    networks:
+      - stock_management_network
+    volumes:
+      - ./stock-management-backend:/app
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # Frontend Web Application
+  frontend:
+    build:
+      context: ./stock-management-frontend
+      dockerfile: Dockerfile
+    container_name: stock_management_frontend
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - backend
+    networks:
+      - stock_management_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # Redis for caching (optional)
+  redis:
+    image: redis:7-alpine
+    container_name: stock_management_redis
+    ports:
+      - "6379:6379"
+    networks:
+      - stock_management_network
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  stock_management_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
