@@ -122,3 +122,20 @@
     - Verify service discovery and internal networking
     - Validate persistent volume mounting and data persistence
     - _Requirements: 2.3, 6.1, 8.1, 8.4_
+- [x] 11. Fix Immediate Dokploy Deployment Issues
+  - [x] 11.1 Remove obsolete version attribute from Docker Compose files
+    - Remove version attribute from docker-compose.yml and docker-compose.dokploy.yml
+    - Update compose files to use modern Docker Compose format
+    - _Requirements: 1.1, 1.4_
+
+  - [x] 11.2 Fix network connectivity issues for Dokploy
+    - Simplify network configuration to use default Docker networks
+    - Remove static IP assignments that conflict with Dokploy's network management
+    - Update service communication to use service names instead of IP addresses
+    - _Requirements: 6.1, 1.1_
+
+  - [x] 11.3 Create Dokploy-optimized compose file
+    - Create a clean docker-compose file specifically for Dokploy deployment
+    - Remove Dokploy-incompatible configurations (static IPs, custom networks)
+    - Ensure all services use service discovery via service names
+    - _Requirements: 1.1, 6.1, 2.3_

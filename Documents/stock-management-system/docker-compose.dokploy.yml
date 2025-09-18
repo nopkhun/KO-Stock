@@ -1,5 +1,3 @@
-version: '3.8'
-
 # Dokploy-specific overrides
 # This file contains configurations optimized for Dokploy deployment
 
@@ -78,9 +76,4 @@ volumes:
     # Let Dokploy manage the volume
     external: false
 
-networks:
-  stock_management_network:
-    # Dokploy-managed network
-    external: false
-    labels:
-      - "dokploy.network=true"
+# Networks are managed by Dokploy automatically
