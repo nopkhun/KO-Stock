@@ -139,3 +139,16 @@
     - Remove Dokploy-incompatible configurations (static IPs, custom networks)
     - Ensure all services use service discovery via service names
     - _Requirements: 1.1, 6.1, 2.3_
+
+- [x] 12. Resolve Persistent Network Connectivity Issues
+  - [x] 12.1 Remove all custom network configurations
+    - Remove all network references from docker-compose.yml
+    - Create minimal compose file without any network definitions
+    - Update troubleshooting documentation
+    - _Requirements: 6.1, 1.1_
+
+  - [x] 12.2 Provide Dokploy project cleanup instructions
+    - Create step-by-step cleanup guide for Dokploy
+    - Document manual network cleanup procedures
+    - Add verification steps for successful deployment
+    - _Requirements: 1.4, 6.1_

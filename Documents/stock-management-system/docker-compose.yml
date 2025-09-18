@@ -12,8 +12,6 @@ services:
       - postgres_data:/var/lib/postgresql/data
     expose:
       - "5432"
-    networks:
-      - stock_management_network
     security_opt:
       - no-new-privileges:true
     read_only: false
@@ -59,8 +57,6 @@ services:
     depends_on:
       database:
         condition: service_healthy
-    networks:
-      - stock_management_network
     security_opt:
       - no-new-privileges:true
     read_only: false
@@ -101,8 +97,6 @@ services:
     depends_on:
       backend:
         condition: service_healthy
-    networks:
-      - stock_management_network
     security_opt:
       - no-new-privileges:true
     read_only: true
@@ -141,6 +135,4 @@ volumes:
     name: ${POSTGRES_VOLUME_NAME:-stock_management_postgres_data}
     external: ${POSTGRES_VOLUME_EXTERNAL:-false}
 
-networks:
-  stock_management_network:
-    driver: bridge
+
