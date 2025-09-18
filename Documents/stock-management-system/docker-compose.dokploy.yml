@@ -1,0 +1,86 @@
+version: '3.8'
+
+# Dokploy-specific overrides
+# This file contains configurations optimized for Dokploy deployment
+
+services:
+  database:
+    # Dokploy-friendly volume configuration
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      # Dokploy will inject these via environment variables
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    labels:
+      - "dokploy.enable=true"
+      - "dokploy.service=database"
+      - "dokploy.health.check=true"
+      - "dokploy.resources.memory=512M"
+      - "dokploy.resources.cpu=1.0"
+
+  backend:
+    environment:
+      # Dokploy-injected environment variables
+      DATABASE_URL: ${DATABASE_URL}
+      SECRET_KEY: ${SECRET_KEY}
+      FLASK_ENV: ${FLASK_ENV:-production}
+    deploy:
+      resources:
+        limits:
+          cpus: '1.5'
+          memory: 768M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+    labels:
+      - "dokploy.enable=true"
+      - "dokploy.service=backend"
+      - "dokploy.health.check=true"
+      - "dokploy.port=5000"
+      - "dokploy.resources.memory=768M"
+      - "dokploy.resources.cpu=1.5"
+
+  frontend:
+    ports:
+      - "${DOKPLOY_PORT:-80}:80"
+    environment:
+      # Backend URL for API proxy
+      BACKEND_URL: http://backend:5000
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          cpus: '0.1'
+          memory: 64M
+    labels:
+      - "dokploy.enable=true"
+      - "dokploy.service=frontend"
+      - "dokploy.health.check=true"
+      - "dokploy.port=80"
+      - "dokploy.domain=${DOKPLOY_DOMAIN}"
+      - "dokploy.resources.memory=256M"
+      - "dokploy.resources.cpu=0.5"
+
+volumes:
+  postgres_data:
+    # Let Dokploy manage the volume
+    external: false
+
+networks:
+  stock_management_network:
+    # Dokploy-managed network
+    external: false
+    labels:
+      - "dokploy.network=true"

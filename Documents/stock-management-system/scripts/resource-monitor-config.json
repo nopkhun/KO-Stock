@@ -1,0 +1,47 @@
+{
+  "thresholds": {
+    "cpu": {
+      "warning": 70,
+      "critical": 85
+    },
+    "memory": {
+      "warning": 80,
+      "critical": 90
+    },
+    "disk": {
+      "warning": 80,
+      "critical": 90
+    },
+    "response_time": {
+      "warning": 1000,
+      "critical": 3000
+    }
+  },
+  "alerts": {
+    "enabled": true,
+    "email_enabled": false,
+    "webhook_enabled": false,
+    "cooldown_minutes": 15
+  },
+  "logging": {
+    "file": "/var/log/resource-monitor.log",
+    "level": "INFO"
+  },
+  "email": {
+    "enabled": false,
+    "smtp_server": "smtp.gmail.com",
+    "smtp_port": 587,
+    "use_tls": true,
+    "from": "alerts@yourdomain.com",
+    "to": ["admin@yourdomain.com"],
+    "username": "your-email@gmail.com",
+    "password": "your-app-password"
+  },
+  "webhook": {
+    "enabled": false,
+    "url": "https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK",
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

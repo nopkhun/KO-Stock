@@ -1,0 +1,72 @@
+version: '3.8'
+
+# Production overrides for Dokploy deployment
+# Use with: docker-compose -f docker-compose.yml -f docker-compose.prod.yml up
+
+services:
+  database:
+    # Remove port exposure for production (internal access only)
+    ports: []
+    environment:
+      # Production-specific database settings
+      POSTGRES_SHARED_PRELOAD_LIBRARIES: "pg_stat_statements"
+      POSTGRES_LOG_STATEMENT: "all"
+      POSTGRES_LOG_MIN_DURATION_STATEMENT: "1000"
+    command: >
+      postgres
+      -c shared_preload_libraries=pg_stat_statements
+      -c log_statement=all
+      -c log_min_duration_statement=1000ms
+      -c log_line_prefix='%t [%p]: [%l-1] user=%u,db=%d,app=%a,client=%h '
+      -c log_checkpoints=on
+      -c log_connections=on
+      -c log_disconnections=on
+      -c log_lock_waits=on
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+  backend:
+    # Remove port exposure for production (accessed via frontend proxy)
+    ports: []
+    environment:
+      FLASK_ENV: production
+      FLASK_DEBUG: "false"
+      SESSION_COOKIE_SECURE: "true"
+      SESSION_COOKIE_HTTPONLY: "true"
+      SESSION_COOKIE_SAMESITE: "Lax"
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+
+  frontend:
+    environment:
+      NGINX_WORKER_PROCESSES: "auto"
+      NGINX_WORKER_CONNECTIONS: "1024"
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+
+networks:
+  stock_management_network:
+    # Production network with stricter isolation
+    internal: false
+    driver_opts:
+      com.docker.network.bridge.enable_icc: "true"
+      com.docker.network.bridge.enable_ip_masquerade: "true"
+      com.docker.network.bridge.host_binding_ipv4: "0.0.0.0"
