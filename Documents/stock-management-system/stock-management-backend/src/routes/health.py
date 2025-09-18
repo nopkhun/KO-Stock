@@ -659,3 +659,35 @@ def get_application_health():
             'status': 'error',
             'error': str(e)
         }
+
+@health_bp.route('/ping', methods=['GET'])
+def ping():
+    """
+    Ultra-simple ping endpoint for basic connectivity testing
+    Returns immediately without any dependencies or checks
+    """
+    return jsonify({
+        'status': 'ok',
+        'message': 'pong',
+        'timestamp': datetime.utcnow().isoformat()
+    }), 200
+
+@health_bp.route('/health/simple', methods=['GET'])
+def simple_health():
+    """
+    Simple health check without database dependencies
+    Use this for initial container health verification
+    """
+    try:
+        return jsonify({
+            'status': 'healthy',
+            'service': 'stock-management-backend',
+            'timestamp': datetime.utcnow().isoformat(),
+            'version': '1.0.0'
+        }), 200
+    except Exception as e:
+        return jsonify({
+            'status': 'unhealthy',
+            'error': str(e),
+            'timestamp': datetime.utcnow().isoformat()
+        }), 503

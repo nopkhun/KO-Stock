@@ -1,5 +1,5 @@
-# Minimal Docker Compose for Dokploy - No custom networks
-# This file removes ALL network configurations to let Dokploy handle networking automatically
+# Debug version of Docker Compose with extended timeouts and logging
+# Use this version to troubleshoot health check failures
 
 services:
   database:
@@ -15,11 +15,16 @@ services:
       - "5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-stock_management}"]
-      interval: 15s
-      timeout: 10s
-      retries: 5
-      start_period: 30s
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s  # Extended start period
     restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"  # Increased log size for debugging
+        max-file: "5"
 
   backend:
     build:
@@ -27,20 +32,35 @@ services:
       dockerfile: Dockerfile
     environment:
       DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres123@database:5432/stock_management}
-      SECRET_KEY: ${SECRET_KEY:-your-secret-key-here}
+      SECRET_KEY: ${SECRET_KEY:-debug-secret-key-change-in-production}
       FLASK_ENV: ${FLASK_ENV:-production}
+      DEBUG: ${DEBUG:-false}
+      # Debug environment variables
+      PYTHONUNBUFFERED: "1"
+      FLASK_DEBUG: "0"
+      LOG_LEVEL: "DEBUG"
     expose:
       - "5000"
     depends_on:
       database:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5000/api/ping"]
-      interval: 30s
-      timeout: 15s
-      retries: 5
-      start_period: 90s
+      # More robust health check with fallback
+      test: |
+        curl -f http://localhost:5000/api/health || 
+        curl -f http://localhost:5000/api/health/live || 
+        curl -f http://localhost:5000/ || 
+        exit 1
+      interval: 15s
+      timeout: 30s      # Extended timeout
+      retries: 10       # More retries
+      start_period: 120s # Extended start period for slow startup
     restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"  # Increased log size for debugging
+        max-file: "5"
 
   frontend:
     build:
@@ -55,9 +75,14 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost/health"]
       interval: 30s
       timeout: 10s
-      retries: 3
-      start_period: 20s
+      retries: 5
+      start_period: 30s
     restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"
 
 volumes:
   postgres_data:

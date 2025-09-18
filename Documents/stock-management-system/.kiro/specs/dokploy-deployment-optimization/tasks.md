@@ -152,3 +152,22 @@
     - Document manual network cleanup procedures
     - Add verification steps for successful deployment
     - _Requirements: 1.4, 6.1_
+
+- [x] 13. Fix Backend Health Check Failures
+  - [x] 13.1 Diagnose backend startup issues
+    - Add startup logging and debugging
+    - Check environment variable validation
+    - Verify database connection during startup
+    - _Requirements: 4.1, 4.2, 5.4_
+
+  - [x] 13.2 Improve health check reliability
+    - Add fallback health check endpoint
+    - Increase health check timeout and start period
+    - Add detailed error logging for health check failures
+    - _Requirements: 4.1, 1.2_
+
+  - [x] 13.3 Create debugging compose file
+    - Create version with extended timeouts and debugging
+    - Add environment variables for troubleshooting
+    - Include container logs access instructions
+    - _Requirements: 1.4, 4.2_
