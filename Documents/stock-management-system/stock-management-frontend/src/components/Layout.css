@@ -1,0 +1,37 @@
+/* Layout specific styles */
+.sidebar-transition {
+  transition: transform 0.3s ease-in-out;
+}
+
+/* Mobile-first responsive design */
+@media (max-width: 1024px) {
+  .sidebar {
+    position: fixed;
+    z-index: 50;
+  }
+}
+
+/* Smooth animations */
+.fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Touch-friendly button sizes for mobile */
+@media (max-width: 768px) {
+  .mobile-button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
